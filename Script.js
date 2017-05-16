@@ -1,5 +1,6 @@
-var canvas = document.getElementById('canvasId');
-var ctx = canvas.getContext('2d');
+var canvas = document.getElementById('canvasFx')
+var ctx = canvas.getContext('2d')
+var ctxInfo = document.getElementById('canvasInfo').getContext('2d')
 var height = canvas.clientHeight
 var width = canvas.clientWidth
 
@@ -7,20 +8,85 @@ var array = []
 var distributionLaw = []
 var Fx = []
 var rightLimit = 100
-var leftLimit = -rightLimit;
+var leftLimit = -rightLimit
 
 var coef = 200
 var xLocation = 10
 var yLocation = height - coef
-var axissLength = height
-
-function drawFx() {
-
-}
+var axissLength = width
 
 function drawAxiss() {
+	let textCoef = 10
+	let counter = Fx.length - 1
 	drawLine(0, yLocation, axissLength, yLocation)
 	drawLine(xLocation, 0, xLocation, axissLength)
+	ctx.font = '16px serif'
+	ctx.fillText('y', textCoef*2, textCoef)
+	ctx.fillText('x', width - textCoef, yLocation - textCoef)
+	ctx.fillText('0', textCoef*2, yLocation + textCoef*2)
+
+	for(let element of Fx)
+		counter = drawSegments(element, counter, textCoef)
+}
+
+function drawSegments(element, counter, textCoef) {
+	let segment = element.segment
+	let coef = 20
+	let probabilityCoef = 100
+	let circleRadius = 5
+	console.log(segment)
+	drawFxLine(
+				   height - segment.begin*coef,
+				   height - segment.end*coef,
+				   element.p*probabilityCoef + yLocation - coef*5
+			  )
+	drawCircle(
+				 	height - segment.end*coef,
+					element.p*probabilityCoef + height - yLocation - coef*2.5,
+					circleRadius,
+					false
+			  )
+	drawCircle(
+				 	height - segment.begin*coef,
+					element.p*probabilityCoef + height - yLocation - coef*2.5,
+					circleRadius,
+					true
+		      )
+	ctx.fillText(
+					'|' + Fx[counter--].segment.end,
+					height - segment.begin*coef,
+					yLocation + textCoef*2
+				)
+	if(element.p != 0)
+		ctx.fillText(
+						roundPlus(element.p, 1),
+						textCoef*2,
+						yLocation - element.p*100
+					)
+	return counter
+}
+
+function drawCircle(x, y, circleRadius, fill) {
+	ctx.beginPath();
+	ctx.arc(x, y, circleRadius, 0, 2*Math.PI, false)
+	ctx.fillStyle = 'red'
+	fill ? ctx.fill() : ctx.stroke()
+	ctx.fillStyle = 'black'
+}
+
+function roundPlus(number, decimalPlaces) {
+	if(isNaN(number) || isNaN(decimalPlaces))
+		return false
+	let coef = Math.pow(10, decimalPlaces)
+	return Math.round(number*coef)/coef
+}
+
+function drawFxLine(beg, end, p) {
+	ctx.strokeStyle = 'red'
+	ctx.beginPath();
+	ctx.moveTo(beg,p);
+	ctx.lineTo(end, p);
+	ctx.stroke();
 }
 
 function drawLine(x0, y0, x1, y1) {
@@ -29,8 +95,6 @@ function drawLine(x0, y0, x1, y1) {
 	ctx.lineTo(x1, y1);
 	ctx.stroke();
 }
-
-drawAxiss()
 
 function fillFx() {
 	let length = distributionLaw.length
@@ -61,19 +125,39 @@ function fillDistribution(numberSorting, elementsNumber, min, max) {
 	let counter = 0
 	let permutationsArray = []
 	let element
+	let addCoef = 20
+	let lineY = addCoef
+	ctxInfo.font = '16px serif'
+	ctxInfo.fillText('Arrays', lineY, addCoef)
+	lineY += addCoef
 	while(counter < numberSorting) {
 		let permutations
+
 		setArray(elementsNumber, min, max)
+		ctxInfo.fillText('Unsorted', addCoef, lineY += addCoef)
+		drawArray(array, lineY += addCoef)
+
+		ctxInfo.fillText('Sorted', addCoef, lineY += addCoef)
 		element = shellSort(array)
+		drawArray(array, lineY += addCoef)
+
 		console.log(element.perm)
 		permutationsArray.push(element.perm)
 		console.log(element.arr)
 		array = []
+		lineY += addCoef
 		counter++
 	}
 	element = shellSort(permutationsArray)
 	combineRepeats(element.arr)
 	console.log(distributionLaw)
+}
+
+function drawArray(inputArray, lineY) {
+	let rowCounter = 10
+	for(let number of inputArray) {
+		ctxInfo.fillText(number + ' | ', rowCounter += 30, lineY)
+	}
 }
 
 function combineRepeats(permutationsArray) {
@@ -126,3 +210,4 @@ function shellSort(inputArray) {
 
 fillDistribution(5, 10, 0, 10)
 fillFx()
+drawAxiss()
