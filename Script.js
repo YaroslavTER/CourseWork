@@ -17,7 +17,7 @@ var axissLength = width
 
 function drawAxiss() {
 	let textCoef = 10
-	let counter = Fx.length - 1
+	let counter = 0
 	drawLine(0, yLocation, axissLength, yLocation)
 	drawLine(xLocation, 0, xLocation, axissLength)
 	ctx.font = '16px serif'
@@ -34,27 +34,18 @@ function drawSegments(element, counter, textCoef) {
 	let coef = 20
 	let probabilityCoef = 100
 	let circleRadius = 5
+	let begin = segment.begin*coef
+	let end = segment.end*coef
+	let p = (element.p*probabilityCoef +
+		     yLocation - coef*5)*(-1) + probabilityCoef*4
 	console.log(segment)
-	drawFxLine(
-				   height - segment.begin*coef,
-				   height - segment.end*coef,
-				   element.p*probabilityCoef + yLocation - coef*5
-			  )
-	drawCircle(
-				 	height - segment.end*coef,
-					element.p*probabilityCoef + height - yLocation - coef*2.5,
-					circleRadius,
-					false
-			  )
-	drawCircle(
-				 	height - segment.begin*coef,
-					element.p*probabilityCoef + height - yLocation - coef*2.5,
-					circleRadius,
-					true
-		      )
+	drawFxLine(begin, end, p)
+	drawCircle(end, p, circleRadius, false)
+	drawCircle(begin, p, circleRadius, true)
+
 	ctx.fillText(
-					'|' + Fx[counter--].segment.end,
-					height - segment.begin*coef,
+					'|' + Fx[counter++].segment.begin,
+					begin,
 					yLocation + textCoef*2
 				)
 	if(element.p != 0)
